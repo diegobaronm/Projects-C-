@@ -366,7 +366,7 @@ int main(){
     std::cout<<V<<std::endl;
     std::cout<<G.Mag()<<std::endl;
     std::cout<<V*G<<std::endl;
-    vector K(3,"n",false);
+    Vector K(3,"n",false);
 
 
 
