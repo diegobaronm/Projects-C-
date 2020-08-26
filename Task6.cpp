@@ -341,7 +341,7 @@ int main(){
     Matrix Test(3,2,"n");
     std::cout<<Test<<std::endl;
     std::cout<<Test.Trans()<<std::endl;
-    /*Matrix A(2,2);
+    Matrix A(2,2);
     Matrix B(2,2,"n");
     Matrix C{std::move(B)};
     Matrix D=C+A;
@@ -359,7 +359,7 @@ int main(){
     Matrix R=(3*I+I*2);
     std::cout<<(3*I+I*2)<<std::endl;
     std::cout<<"Displaying reduced Matrix"<<std::endl;
-    std::cout<<R.Minor(1,2)<<std::endl;*/
+    std::cout<<R.Minor(1,2)<<std::endl;
 
     Vector V(3,"n",false);
     Vector G(3,"n",false);
