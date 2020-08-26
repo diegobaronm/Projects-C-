@@ -285,9 +285,10 @@ Matrix Identity(size_t r){
 class Vector: public Matrix{
     protected:
         bool is_column{true};
+        size_t Dimension{0};
     public:
         Vector(){std::cout<<"Column Vector Created"<<std::endl;}
-        Vector(size_t dim, std::string default_entries="zeros", bool column_vector=true):Matrix(dim,1,default_entries){
+        Vector(size_t dim, std::string default_entries="zeros", bool column_vector=true):Matrix(dim,1,default_entries),Dimension{dim}{
             if(!column_vector){
                 is_column=false;
                 double** copy_entries{std::move(entries)};      
@@ -305,12 +306,22 @@ class Vector: public Matrix{
         }
         size_t Dim()const;
         double Mag()const;
-        double operator*(const Vector& B) const;
+        Vector operator*(const Vector& B) const;
+        double Dot(Vector& V) const;
+        double& operator[](size_t entry) const;
+        Vector operator+(const Vector& V)const;
+        Vector operator-(const Vector& V)const;
 
 };
 size_t Vector::Dim()const{
-    if(rows==1)return columns;
-    else return rows;
+    return Dimension;
+}
+double& Vector::operator[](size_t entry) const{
+    if(is_column){
+        return (entries[entry][0]);
+    } else {
+        return (entries[0][entry]);
+    }
 }
 double Vector::Mag()const{
     double Mag{};
@@ -318,27 +329,58 @@ double Vector::Mag()const{
         for(size_t j{};j<columns;j++){
             Mag+=pow(entries[i][j],2);
         }
-    return Mag;
+    return sqrt(Mag);
 }
-double Vector::operator*(const Vector& B) const{
-    if(this->Dim()!=B.Dim()){
+double Vector::Dot(Vector& V) const{
+    if(this->Dim()!=V.Dim()){
         std::cout<<"Can not take the dot product of two different dimension vectors"<<std::endl;
         throw;
-    } else if (is_column && B.is_column){
-        double dot{};
-        for(size_t i{}; i<rows; i++) 
-            for(size_t j{};j<columns;j++){
-                dot+=entries[i][j]*B[i][j];
-            }
-        return dot;
     } else {
-        
+        double dot{};
+        for(size_t i{}; i<Dimension; i++) 
+                dot+=(*this)[i]*V[i];
+        return dot;
+    }
+}
+Vector Vector::operator*(const Vector& V) const{
+    if(Dimension!=3 || V.Dimension!=3){
+        std::cout<<"Cross product not defined for vectors with dimension different to 3."<<std::endl;
+        throw;
+    } else{
+        Vector Cross(3);
+        Cross[0]=(*this)[1]*V[2]-(*this)[2]*V[1];
+        Cross[1]=(*this)[0]*V[2]-(*this)[2]*V[0];
+        Cross[2]=(*this)[0]*V[1]-(*this)[1]*V[0];
+        return Cross;
+    }
+}
+Vector Vector::operator+(const Vector& V) const{
+    if(Dimension!=V.Dimension){
+        std::cout<<"Vectors with different dimensions can not be added."<<std::endl;
+        throw;
+    } else {
+        Vector Sum(Dimension);
+        for(size_t i{0};i<Dimension;i++){
+            Sum[i]=(*this)[i]+V[i];
+        }
+        return Sum;
+    }
+}
+Vector Vector::operator-(const Vector& V) const{
+    if(Dimension!=V.Dimension){
+        std::cout<<"Vectors with different dimensions can not be added."<<std::endl;
+        throw;
+    } else {
+        Vector Sum(Dimension);
+        for(size_t i{0};i<Dimension;i++){
+            Sum[i]=(*this)[i]-V[i];
+        }
+        return Sum;
     }
 }
 
-
 int main(){
-    Matrix Test(3,2,"n");
+    /*Matrix Test(3,2,"n");
     std::cout<<Test<<std::endl;
     std::cout<<Test.Trans()<<std::endl;
     Matrix A(2,2);
@@ -359,18 +401,22 @@ int main(){
     Matrix R=(3*I+I*2);
     std::cout<<(3*I+I*2)<<std::endl;
     std::cout<<"Displaying reduced Matrix"<<std::endl;
-    std::cout<<R.Minor(1,2)<<std::endl;
+    std::cout<<R.Minor(1,2)<<std::endl;*/
 
-    Vector V(3,"n",false);
+    Vector V(3,"n",true);
     Vector G(3,"n",false);
     std::cout<<V<<std::endl;
+    std::cout<<G<<std::endl;
     std::cout<<G.Mag()<<std::endl;
+    std::cout<<V.Dot(G)<<std::endl;
+    std::cout<<V<<std::endl;
+    std::cout<<G<<std::endl;
+    G[2]=3;
+    std::cout<<G<<std::endl;
     std::cout<<V*G<<std::endl;
-    Vector K(3,"n",false);
-    Vector R(4,"n",false);
-
-
-
+    std::cout<<V+G+V<<std::endl;
+    Vector H{V+V+V};
+    std::cout<<H<<std::endl;
 
     return 0;
 }
