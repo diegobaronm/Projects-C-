@@ -5,7 +5,10 @@
 class Particle {
     //---------------------FRIENDS OF THE CLASS-------------------------------
     //OBJECT INFORMATION PRINTER
-    friend std::ostream & operator<<(std::ostream &os, const Particle& P);
+    friend std::ostream & operator<<(std::ostream &os, const Particle& P){
+        P.Info();
+        return os;
+    };
 
     protected:
     //PROPERTIES OF THE PARTICLE
@@ -32,16 +35,18 @@ class Particle {
     void SetVelX(double vx);
     void SetVelY(double vy);
     //GETTERS
-    std::string GetName();
-    std::string GetType();
-    bool IsFundamental();
-    int GetCharge();
-    double GetMass();
-    double GetSpin();
-    double GetPosX();
-    double GetPosY();
-    double GetVelX();
-    double GetVelY();
+    std::string GetName()const;
+    std::string GetType()const;
+    bool IsFundamental()const;
+    int GetCharge()const;
+    double GetMass()const;
+    double GetSpin()const;
+    double GetPosX()const;
+    double GetPosY()const;
+    double GetVelX()const;
+    double GetVelY()const;
+
+    virtual void Info() const;
 };
 //PARAMETRIZED CONSTRUCTOR
 Particle::Particle(std::string nme, int c, double m, double s, double posx, double posy, double vx, double vy, std::string t, bool p_l){
@@ -58,32 +63,32 @@ Particle::Particle(std::string nme, int c, double m, double s, double posx, doub
     point_like=p_l;
 }
 // << OVERLOAD OPERATOR
-std::ostream & operator<<(std::ostream &os, const Particle& P){
+void Particle::Info()const{
     //CHECK SPIN AND CONVERT IT TO STRING
-    std::string spin="1/2";
-    if (P.spin==0 || P.spin==1 || P.spin==2)
+    std::string sspin="1/2";
+    if (spin==0 || spin==1 || spin==2)
     {
-        spin=std::to_string(P.spin);
-    } else if (P.spin==1.5)
+        sspin=std::to_string(spin);
+    } else if (spin==1.5)
     {
-        spin="3/2";
+        sspin="3/2";
     }
     //CHECK IF IT IS POINT LIKE AND CONVERT IT TO STRING
     std::string pl="Yes";
-    if(!P.point_like){
+    if(!point_like){
         pl="No";
     }
     //CREATE THE OUTPUT STRING
-    os<<"Information of "<<P.name<<" :"<<std::endl;
-    os<<"Charge: "<<P.charge<<std::endl;
-    os<<"Mass: "<<P.mass<<std::endl;
-    os<<"Spin: "<<spin<<std::endl;
-    os<<"Type: "<<P.type<<std::endl;
-    os<<"Point like: "<<pl<<std::endl;
-    os<<"Position: "<<"("<<P.x<<","<<P.y<<")"<<std::endl;
-    os<<"Velocity: "<<"("<<P.v_x<<","<<P.v_y<<")"<<std::endl;
+    std::cout<<"Information of "<<name<<" :"<<std::endl;
+    std::cout<<"Charge: "<<charge<<std::endl;
+    std::cout<<"Mass: "<<mass<<std::endl;
+    std::cout<<"Spin: "<<sspin<<std::endl;
+    std::cout<<"Type: "<<type<<std::endl;
+    std::cout<<"Point like: "<<pl<<std::endl;
+    std::cout<<"Position: "<<"("<<x<<","<<y<<")"<<std::endl;
+    std::cout<<"Velocity: "<<"("<<v_x<<","<<v_y<<")"<<std::endl;
 
-    return os;
+    //return os;
 }
 //SETTER METHODS
 void Particle::SetName(std::string nme){
@@ -108,42 +113,41 @@ void Particle::SetVelY(double vy){
     v_y=vy;
 }
 //GETTER METHODS
-std::string Particle::GetName(){
+std::string Particle::GetName()const{
     return name;
 }
-std::string Particle::GetType(){
+int Particle::GetCharge()const{
+    return charge;
+}
+std::string Particle::GetType()const{
     return type;
 }
-bool Particle::IsFundamental(){
+bool Particle::IsFundamental()const{
     return point_like;
 }
-double Particle::GetMass(){
+double Particle::GetMass()const{
     return mass;
 }
-double Particle::GetSpin(){
+double Particle::GetSpin()const{
     return spin;
 }
-double Particle::GetPosX(){
+double Particle::GetPosX()const{
     return x;
 }
-double Particle::GetPosY(){
+double Particle::GetPosY()const{
     return y;
 }
-double Particle::GetVelX(){
+double Particle::GetVelX()const{
     return v_x;
 }
-double Particle::GetVelY(){
+double Particle::GetVelY()const{
     return v_y;
 }
 //ELECTRON CLASS DEFINITION ---- INHERITS FROM PARTICLE
 class Electron : public Particle{
      //-------------FRIENDS-------------------
     friend std::ostream & operator<<(std::ostream &os , Electron &E){
-        std::string status="free.";
-        if(E.on_atom){status="bound.";}
-        //CAST TO A PARTICLE TYPE TO USE BASE CLASS FRIEND FUNCTION
-        os<<(const Particle&)E;
-        os<<"Electron is "<<status<<std::endl;
+        E.Info();
         return os;
     }
     protected :
@@ -152,26 +156,62 @@ class Electron : public Particle{
     public :
     // CONSTRUCTORS
     // DEFAULT CONSTRUCTOR
-    Electron() : Particle{"Electron(Default)",-1,0.5,0.5,0,0,0,0,"Lepton",true}{std::cout<<"Electron Created"<<std::endl;}
+    Electron() : Particle{"Electron(Default)",-1,0.5,0.5,0,0,0,0,"Lepton",true}{std::cout<<"Electron Created(DEFAULT)"<<std::endl;}
     // PARAMETRIZED CONSTRUCTOR
     Electron(std::string name, double x, double y, double vx, double vy, bool on_at) : Particle{name,-1,0.5,0.5,x,y,vx,vy,"Lepton",true}, on_atom(on_at){std::cout<<"Electron Created"<<std::endl;}
+    // MOVE CONSTRUCTOR
+    Electron(Electron &&E){
+        std::cout<<"Electron Created(Move)"<<std::endl;
+        name=E.name;
+        charge=E.charge;
+        mass=E.mass;
+        spin=E.spin;
+        x=E.x;
+        y=E.y;
+        v_x=E.v_x;
+        v_y=E.v_y;
+        type=E.type;
+        point_like=E.point_like;
+        on_atom=E.on_atom;
+    }
     // DESTRUCTOR
     ~Electron(){std::cout<<"Electron Destroyed"<<std::endl;}
 
+    //ASSIGNEMENT OPERATOR
+    Electron & operator=(const Electron &E){
+        std::cout<<"Assignement opeartor for Electron"<<std::endl;
+        if(&E==this){return *this;}
+        name=E.GetName();
+        charge=E.GetCharge();
+        mass=E.GetMass();
+        spin=E.GetSpin();
+        x=E.GetPosX();
+        y=E.GetPosY();
+        v_x=E.GetVelX();
+        v_y=E.GetVelY();
+        type=E.GetType();
+        point_like=E.IsFundamental();
+        on_atom=E.GetBound();
+        return *this;
+    }
     void SetMass(double m){
         std::cout<<"You can not change the mass of the electron!"<<std::endl;
     }
+    void Info() const{
+        this->Particle::Info();
+
+        std::string status="free.";
+        if(on_atom){status="bound.";}
+        std::cout<<"Electron is "<<status<<std::endl;
+    };
+    bool GetBound()const{return on_atom;}
 };
 
 //PROTON CLASS DEFINITION ---- INHERITS FROM PARTICLE
 class Proton : public Particle{
     //-------------FRIENDS-------------------
     friend std::ostream & operator<<(std::ostream &os , Proton &P){
-        std::string status="free.";
-        if(P.on_atom){status="bound.";}
-        //CAST TO A PARTICLE TYPE TO USE BASE CLASS FRIEND FUNCTION
-        os<<(const Particle&)P;
-        os<<"Proton is "<<status<<std::endl;
+        P.Info();
         return os;
     }
     protected :
@@ -185,17 +225,20 @@ class Proton : public Particle{
     Proton(std::string name, double x, double y, double vx, double vy, bool on_at) : Particle{name,1,938,0.5,x,y,vx,vy,"Nucleon",false}, on_atom(on_at){std::cout<<"Proton Created"<<std::endl;}
     // DESTRUCTOR
     ~Proton(){std::cout<<"Proton Destroyed"<<std::endl;}
+    void Info() const{
+        this->Particle::Info();
+
+        std::string status="free.";
+        if(on_atom){status="bound.";}
+        std::cout<<"Proton is "<<status<<std::endl;
+    };
 };
 
 //NEUTRON CLASS DEFINITION ---- INHERITS FROM PARTICLE
 class Neutron : public Particle{
     //-------------FRIENDS-------------------
     friend std::ostream & operator<<(std::ostream &os , Neutron &N){
-        std::string status="free.";
-        if(N.on_atom){status="bound.";}
-        //CAST TO A PARTICLE TYPE TO USE BASE CLASS FRIEND FUNCTION
-        os<<(const Particle&)N;
-        os<<"Neutron is "<<status<<std::endl;
+        N.Info();
         return os;
     }
     protected :
@@ -209,24 +252,27 @@ class Neutron : public Particle{
     Neutron(std::string name, double x, double y, double vx, double vy, bool on_at) : Particle{name,0,940,0.5,x,y,vx,vy,"Nucleon",false}, on_atom(on_at){std::cout<<"Neutron Created"<<std::endl;}
     // DESTRUCTOR
     ~Neutron(){std::cout<<"Neutron Destroyed"<<std::endl;}
+    void Info() const{
+        this->Particle::Info();
+
+        std::string status="free.";
+        if(on_atom){status="bound.";}
+        std::cout<<"Neutron is "<<status<<std::endl;
+    };
 };
 
 class Atom : public Particle{
     //-------------FRIENDS-------------------
     friend std::ostream & operator<<(std::ostream &os , Atom &A){
-        //CAST TO A PARTICLE TYPE TO USE BASE CLASS FRIEND FUNCTION
-        os<<(const Particle&)A;
-        os<<"Atom is "<<A.element<<std::endl;
-        os<<"Number of electrons is: "<<A.N_e<<std::endl;
-        os<<"Number of protons is: "<<A.Z<<std::endl;
-        os<<"Number of neutrons is: "<<(A.A-A.Z)<<std::endl;
+        A.Info();
         return os;
     }
     protected:
     int Z{0},A{0},N_e{0};
     std::string element{"Empty Space"};
-    Particle **particles{nullptr};
-
+    Proton * protons;
+    Electron * electrons;
+    Neutron * neutrons;
 
     public :
     // CONSTRUCTORS
@@ -238,57 +284,55 @@ class Atom : public Particle{
     ~Atom(){std::cout<<"Atom Destroyed"<<std::endl;}
 
     //METHODS TO ACCESS THE CONSTITUENTS OF THE ATOM
-    Particle & operator()(const std::string &type,const int &p);
-
+    Electron & GetElectron(const int &i){return electrons[i-1];}
+    Proton & GetProton(const int &i){return protons[i-1];};
+    Neutron & GetNeutron(const int &i){return neutrons[i-1];};
+    void Info()const{
+        this->Particle::Info();
+        std::cout<<"Atom is "<<element<<std::endl;
+        std::cout<<"Number of electrons is: "<<N_e<<std::endl;
+        std::cout<<"Number of protons is: "<<Z<<std::endl;
+        std::cout<<"Number of neutrons is: "<<(A-Z)<<std::endl;
+    }
 };
 
 //PARAMETRIZED CONSTRUCTOR OF ATOM CLASS
 Atom::Atom(std::string name, double x, double y, double vx, double vy, int Z, int A, int N_e, std::string element) : Particle(name,Z-N_e,((double) A-(double) Z)*940+(double) Z*938,0,x,y,vx,vy,"Atom",false),Z(Z), A(A), N_e(N_e), element(element){
     std::cout<<"Atom Created"<<std::endl;
     // DEFINING THE ARRAY CONTAINING THE POINTERS TO THE PARTICLES OF THE ATOM
-    particles = new Particle*[3];
-    particles[0]= new Proton[Z];
-    particles[1]= new Electron[N_e];
-    particles[2]= new Neutron[A-Z];
+    protons = new Proton[A+N_e];
+    electrons = new Electron[A+N_e];
+    neutrons = new Neutron[A+N_e];
     for(size_t i{0};i<Z;i++){
-        particles[0][i]=Proton(name+"_Proton_"+std::to_string(i),0,0,0,0,true);
+        protons[i]=Proton(name+"_Proton_"+std::to_string(i),0,0,0,0,true);
     }
     for(size_t i{0};i<N_e;i++){
-        particles[1][i]=Electron(name+"_Electron_"+std::to_string(i),0,0,0,0,true);
+        electrons[i]=Electron(name+"_Electron_"+std::to_string(i),1,1,1,1,true);
     }
     for(size_t i{0};i<(A-Z);i++){
-        particles[2][i]=Proton(name+"_Neutron_"+std::to_string(i),0,0,0,0,true);
+        neutrons[i]=Neutron(name+"_Neutron_"+std::to_string(i),0,0,0,0,true);
     }
 }
 
-Particle & Atom::operator()(const std::string &type, const int &p){
-    if(type=="P"){
-        return particles[0][p];
-    } else if(type=="N"){
-        return particles[2][p];
-    } else if(type=="E"){
-        return particles[1][p];
-    } else {
-        std::cout<<"Invalid atom particle or index"<<std::endl;
-        throw;
-    }
-}
 
 
 
 int main(){
-    Particle par1=Particle("Pedro",1,2.5,1,0,0,1,2,"Higgs",true);
+    //Particle par1=Particle("Pedro",1,2.5,1,0,0,1,2,"Higgs",true);
     Electron e1=Electron("Ana",1,1,1,1,true);
-    Proton p1=Proton("Naomi",0,0,0,0,true);
-    Neutron n1=Neutron("Pablo",0,0,0,0,false);
-    Atom a1 = Atom("Diego",0,0,0,0,2,4,2,"Helium");
-
-    std::cout<<par1<<std::endl;
+    Electron e2,e3;
+    e3=e2=e1;
+    //Proton p1=Proton("Naomi",0,0,0,0,true);
+    //Neutron n1=Neutron("Pablo",0,0,0,0,false);
+    Atom a1 = Atom("Diego",0,0,0,0,1,1,1,"Hidrogen");
+    //n1=Neutron("Pablo Emilio",1,0,1,0,true);
+    //std::cout<<par1<<std::endl;
     std::cout<<e1<<std::endl;
-    std::cout<<p1<<std::endl;
-    std::cout<<n1<<std::endl;
+    std::cout<<e2<<std::endl;
+    std::cout<<e3<<std::endl;
+    //std::cout<<n1<<std::endl;
     std::cout<<a1<<std::endl;
-    std::cout<<(a1("P",1))<<std::endl;
+    std::cout<<a1.GetElectron(1)<<std::endl;
 
     return 0;
 }
