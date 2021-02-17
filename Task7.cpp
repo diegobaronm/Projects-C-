@@ -267,12 +267,52 @@ four_vector four_vector::lorentz_boost(general_vector &V){
 class particle{
     protected:
     four_vector position{};
-    double mass{0};
+    double particle_mass{0};
     general_vector velocity{3};
 
     public:
+    // DEFAULT CONSTRUCTOR
     particle(){std::cout<<"Particle created."<<std::endl;}
+    // PARAMETRIZED CONSTRUCTOR
+    particle(four_vector &pos, double mass,general_vector &V);
+
+
+    // FUNCTIONS
+    double gamma();
+    general_vector momentum();
+    double energy();
 };
+
+// PARAMETRIZED CONSTRUCTOR
+particle::particle(four_vector &pos, double mass,general_vector &V){
+    if(V.get_dim()!=3){std::cout<<"Incorrect dimension of the velocity vector."<<std::endl;std::cout<<"Particle created."<<std::endl;}
+    else{
+        position=pos;
+        particle_mass=mass;
+        velocity=V;
+    }
+}
+//FUNCTIONS
+double particle::gamma(){
+    double norm_square = velocity*velocity;
+    double gamma = 1/sqrt(1-norm_square);
+    return gamma;
+}
+
+general_vector particle::momentum(){
+    double gamma = this->gamma();
+    general_vector momentum{velocity};
+    for(size_t i=0;i<3;i++){
+        momentum[i]=gamma*particle_mass*momentum[i];
+    }
+    return momentum;
+}
+
+double particle::energy(){
+    double momentum_square=(this->momentum())*(this->momentum());
+    double energy = sqrt(momentum_square+particle_mass*particle_mass);
+    return energy;
+}
 
 int main(){
     general_vector a{3,"y"};
@@ -293,7 +333,7 @@ int main(){
 
 
     four_vector x{1,a};
-    four_vector y(1,2,3,4);
+    four_vector y(3,3,3,3);
     four_vector z{y};
     four_vector w{std::move(y)};
 
@@ -304,6 +344,18 @@ int main(){
     std::cout<<w;
     std::cout<<x*z<<std::endl;
     std::cout<<boosted_z;
+
+    std::cout<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<std::endl;
+
+    particle photon{};
+    particle electron{y,0.5,a};
+
+    std::cout<<electron.momentum()<<std::endl;
+
+
 
     return 0;
 }
